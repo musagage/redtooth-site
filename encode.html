@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redtooth — Encode</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="redtooth-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="frame">
+
+  <div class="header">
+    <img src="redtooth_logo.jpg" alt="Redtooth logo">
+    <div>
+      <h1><span>RED</span>TOOTH</h1>
+      <div class="tagline">Wireless transfer protocol — no internet, no range limit</div>
+    </div>
+    <div class="nav">
+      <a href="encode.html" class="active">Encode</a>
+      <a href="decode.html">Decode</a>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div class="step active"><span class="num">1</span>Upload</div>
+    <div class="step active"><span class="num">2</span>Inscribe</div>
+    <div class="step"><span class="num">3</span>Dictate </div>
+    <div class="step"><span class="num">4</span>Receive</div>
+  </div>
+
+  <div class="panel">
+   
+    <h2>Upload SVG</h2>
+    <p class="desc">
+      Select or drop an SVG file. It will be stored locally in your session's
+      <code>uploads</code> folder and prepared for inscription. SVG only, for now.
+    </p>
+
+    <label class="dropzone" id="dropzone" for="fileInput">
+      <div class="dz-icon">⇪</div>
+      <div class="dz-label">Drop SVG file here, or click to browse</div>
+      <div class="dz-sub">.SVG — single file</div>
+      <input type="file" id="fileInput" accept=".svg,image/svg+xml">
+    </label>
+
+    <div class="file-info" id="fileInfo">
+      <div>
+        <div class="fname" id="fileName">—</div>
+        <div id="fileMeta">—</div>
+      </div>
+      <button class="copy-btn" id="clearFile" type="button">Remove</button>
+    </div>
+
+    <div class="preview hidden" id="svgPreview"></div>
+
+    <button class="btn" id="inscribeBtn" disabled>Inscribe</button>
+  </div>
+
+  <div class="panel hidden" id="outputPanel">
+    
+    <h2>Generated Code String</h2>
+    <p class="desc">
+      Read this code aloud to the receiver — for example, over a phone call —
+      so they can type it manually into the <b>Decode</b> page. Each block of
+      5 characters is one "word." The final block after <b>::</b> is a checksum
+      the receiver can use to confirm an accurate transcription.
+    </p>
+
+    <div class="transmission">
+      <div class="meta">
+        <span class="signal">● TRANSMISSION READY</span>
+        <span id="codeStats">—</span>
+      </div>
+      <div class="code-output" id="codeOutput"></div>
+    </div>
+
+    <div class="field-row">
+      <button class="btn secondary" id="copyBtn" type="button">Copy Code</button>
+      <button class="btn secondary" id="downloadCodeBtn" type="button">Save as .txt</button>
+    </div>
+
+    <div class="notice">
+      <b>Reminder —</b> on the receiving end, this code should be entered
+      exactly as dictated. Pasting is currently enabled on the Decode page
+      for convenience.
+    </div>
+  </div>
+
+  <div class="footer-note">
+   This is a demo project. 
+  </div>
+
+</div>
+
+<script src="codec.js"></script>
+<script>
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const fileInfo = document.getElementById('fileInfo');
+const fileName = document.getElementById('fileName');
+const fileMeta = document.getElementById('fileMeta');
+const clearFile = document.getElementById('clearFile');
+const svgPreview = document.getElementById('svgPreview');
+const inscribeBtn = document.getElementById('inscribeBtn');
+const outputPanel = document.getElementById('outputPanel');
+const codeOutput = document.getElementById('codeOutput');
+const codeStats = document.getElementById('codeStats');
+const copyBtn = document.getElementById('copyBtn');
+const downloadCodeBtn = document.getElementById('downloadCodeBtn');
+
+let currentSVGText = null;
+let currentFileName = null;
+let lastResult = null;
+
+function resetOutput() {
+  outputPanel.classList.add('hidden');
+  codeOutput.textContent = '';
+  lastResult = null;
+}
+
+function showFile(name, text) {
+  currentFileName = name;
+  currentSVGText = text;
+  fileName.textContent = name;
+  fileMeta.textContent = (new TextEncoder().encode(text).length) + ' bytes — stored in /uploads';
+  fileInfo.classList.add('show');
+  svgPreview.innerHTML = text;
+  svgPreview.classList.remove('hidden');
+  inscribeBtn.disabled = false;
+  resetOutput();
+}
+
+function handleFile(file) {
+  if (!file) return;
+  if (!file.name.toLowerCase().endsWith('.svg') && file.type !== 'image/svg+xml') {
+    alert('Only SVG files are supported.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => showFile(file.name, e.target.result);
+  reader.onerror = () => alert('Could not read file.');
+  reader.readAsText(file);
+}
+
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+clearFile.addEventListener('click', () => {
+  currentSVGText = null;
+  currentFileName = null;
+  fileInput.value = '';
+  fileInfo.classList.remove('show');
+  svgPreview.classList.add('hidden');
+  svgPreview.innerHTML = '';
+  inscribeBtn.disabled = true;
+  resetOutput();
+});
+
+inscribeBtn.addEventListener('click', async () => {
+  if (!currentSVGText) return;
+  inscribeBtn.disabled = true;
+  inscribeBtn.textContent = 'Inscribing…';
+  try {
+    const result = await rtEncodeSVG(currentSVGText);
+    lastResult = result;
+
+    codeOutput.innerHTML = '';
+    result.groups.forEach((g, i) => {
+      const span = document.createElement('span');
+      span.className = 'grp';
+      span.textContent = g + (i < result.groups.length - 1 ? ' ' : '');
+      codeOutput.appendChild(span);
+    });
+    const sep = document.createElement('span');
+    sep.className = 'grp';
+    sep.style.color = 'var(--cream-dim)';
+    sep.textContent = ' :: ';
+    codeOutput.appendChild(sep);
+    const chk = document.createElement('span');
+    chk.className = 'grp';
+    chk.style.color = '#f0533c';
+    chk.style.fontWeight = '600';
+    chk.textContent = result.checksumGroup;
+    codeOutput.appendChild(chk);
+
+    codeStats.textContent = result.groups.length + ' blocks · '
+      + result.raw.length + ' chars · source '
+      + result.originalBytes + ' bytes';
+
+    outputPanel.classList.remove('hidden');
+  } catch (err) {
+    alert('Inscription failed: ' + err.message);
+  } finally {
+    inscribeBtn.disabled = false;
+    inscribeBtn.textContent = 'Inscribe';
+  }
+});
+
+copyBtn.addEventListener('click', async () => {
+  if (!lastResult) return;
+  try {
+    await navigator.clipboard.writeText(lastResult.code);
+    copyBtn.textContent = 'Copied ✓';
+    setTimeout(() => copyBtn.textContent = 'Copy Code', 1500);
+  } catch (e) {
+    alert('Could not copy automatically — select the text manually.');
+  }
+});
+
+downloadCodeBtn.addEventListener('click', () => {
+  if (!lastResult || !currentFileName) return;
+  const blob = new Blob([lastResult.code], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = currentFileName.replace(/\.svg$/i, '') + '.redtooth.txt';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>

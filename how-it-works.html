@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How It Works - Redtooth</title>
+    <link rel="icon" type="image/svg+xml" href="redtooth-logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            line-height: 1.8;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 0, 0, 0.1);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem 4rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            background: linear-gradient(180deg, #ffffff 0%, #888888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .content {
+            color: #ccc;
+            font-size: 1.1rem;
+        }
+
+        .content p {
+            margin-bottom: 1.5rem;
+        }
+
+        .highlight {
+            color: #ff3333;
+            font-weight: 500;
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border:none;
+            border-radius: 12px;
+        }
+
+        .section h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 3rem;
+            color: #ff3333;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>How It Works</h1>
+        
+        <div class="content">
+            <div class="section">
+<p>
+    SMS and MMS messages can only be used on mobile phones. They are not normally sent or received through computers or laptops, because this type of messaging depends mainly on the phone's SIM card. In addition, SMS and MMS cannot support live streaming or any kind of interactive, real-time media. They also cannot be used to share a webpage from a local device to a wide, "global" audience without an internet connection.
+</p>              
+            </div>
+
+            <div class="section">
+<p>
+    Bluetooth also depends on hardware to work. It can only send and receive data wirelessly and offline within a short range, usually between 10 and 100 meters. For a device to use Bluetooth, it must have a Bluetooth chip built into it. Devices without this chip, such as older desktop computers, need other methods, like an Ethernet cable or an external receiver connected through a USB port.
+</p>                
+            </div>
+
+            <div class="section">
+<p>
+    Redtooth, however, does not depend on any special chip or hardware. It works as software, which allows it to send and receive files over much longer distances, without the internet and without wires. In practice, it has been tested over 272 kilometers, and in theory, it could work over several thousand kilometers.
+</p>              
+            </div>
+
+            <!-- <div class="section">
+                <h3>Internet Infrastructure Dependencies</h3>
+                <p>The internet evolved to become this giant connectome parsing information all across the globe, but it wasn't possible without massive fiber optics cables, server farms, data centers, and telecommunication grids. All of which required heavy duty hardware. But that also means if the hardware deteriorates, malfunctions, or something worse happens, the internet just doesn't work properly.</p>
+                <p style="margin-top: 1rem;">For example, often sea creatures bump into fiber optic cables and tear them apart, leading to outages in the associated regions. But Redtooth isn't into this hardware management at all.</p>
+            </div>
+
+            <div class="section">
+                <h3>Local Hosting vs Global Access</h3>
+                <p>Normally, developers on their local machines whenever they want to run and test a website or web application using Apache, PHP, MySQL, they might use servers like XAMPP or WampServer to view the page dynamically onto their web browsers. Other tech stacks can also incorporate similar functionality.</p>
+                <p style="margin-top: 1rem;">Point is, these are only visible to the developer and not to the outside world; hence the site is "locally hosted." For a global audience to view the website or application, the developer must either deploy to cloud (AWS etc.) or server from their own servers and allow traffic and requests through the internet.</p>
+            </div>
+        </div> -->
+
+        <a href="learn-more.html" class="back-link">← Back to Learn More</a>
+    </div>
+</body>
+</html>

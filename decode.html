@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redtooth — Decode</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="redtooth-logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="frame">
+
+  <div class="header">
+    <img src="redtooth_logo.jpg" alt="Redtooth logo">
+    <div>
+      <h1><span>RED</span>TOOTH</h1>
+      <div class="tagline">Wireless transfer protocol — no internet, no range limit</div>
+    </div>
+    <div class="nav">
+      <a href="encode.html">Encode</a>
+      <a href="decode.html" class="active">Decode</a>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div class="step"><span class="num">1</span>Upload</div>
+    <div class="step"><span class="num">2</span>Inscribe</div>
+    <div class="step active"><span class="num">3</span>Dictate</div>
+    <div class="step active"><span class="num">4</span>Receive</div>
+  </div>
+
+  <div class="panel">
+    
+    <h2>Enter Transmission Code</h2>
+    <p class="desc">
+      Type or paste the code exactly as dictated. Include the <b>::</b>
+      checksum block if you have it, so the transcription can be verified.
+    </p>
+
+    <textarea
+      class="code-input"
+      id="codeInput"
+      placeholder="e.g.  K3F9M 7QPRT XJ2WS … :: A7QK"
+      spellcheck="false"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="characters"
+    ></textarea>
+
+    <div class="status-line" id="statusLine">
+      <span class="dot"></span>
+      <span id="statusText">Awaiting input…</span>
+    </div>
+
+    <button class="btn hidden" id="revertBtn">Revert</button>
+  </div>
+
+  <div class="panel hidden" id="resultPanel">
+   
+    <h2>Restored SVG</h2>
+    <div class="preview" id="svgPreview"></div>
+    <button class="btn secondary" id="downloadSvgBtn" type="button">Download SVG</button>
+    <div class="notice" id="checksumNotice"></div>
+  </div>
+
+ <div class="footer-note">
+   This is a demo project. 
+  </div>
+
+</div>
+
+<script src="codec.js"></script>
+<script>
+const codeInput = document.getElementById('codeInput');
+const statusLine = document.getElementById('statusLine');
+const statusText = document.getElementById('statusText');
+const revertBtn = document.getElementById('revertBtn');
+const resultPanel = document.getElementById('resultPanel');
+const svgPreview = document.getElementById('svgPreview');
+const downloadSvgBtn = document.getElementById('downloadSvgBtn');
+const checksumNotice = document.getElementById('checksumNotice');
+
+let lastSVG = null;
+let lastFilename = 'restored.svg';
+
+// --- Pasting enabled (manual-typing requirement temporarily relaxed) ---
+
+function setStatus(kind, text) {
+  statusLine.className = 'status-line' + (kind ? ' ' + kind : '');
+  statusText.textContent = text;
+}
+
+function resetResult() {
+  resultPanel.classList.add('hidden');
+  svgPreview.innerHTML = '';
+  lastSVG = null;
+}
+
+codeInput.addEventListener('input', () => {
+  const val = codeInput.value.trim();
+  resetResult();
+  if (!val) {
+    setStatus('', 'Awaiting input…');
+    revertBtn.classList.add('hidden');
+    return;
+  }
+  // Basic shape check: at least one valid Redtooth character group
+  const alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+  const cleaned = val.toUpperCase().split('').filter(c => alphabet.includes(c)).join('');
+  if (cleaned.length < 4) {
+    setStatus('warn', 'Code looks too short — keep typing.');
+    revertBtn.classList.add('hidden');
+    return;
+  }
+  setStatus('ok', cleaned.length + ' valid characters detected — ready to revert.');
+  revertBtn.classList.remove('hidden');
+});
+
+revertBtn.addEventListener('click', async () => {
+  revertBtn.disabled = true;
+  revertBtn.textContent = 'Reverting…';
+  try {
+    const { svgText, checksumOk } = await rtDecodeToSVG(codeInput.value);
+    lastSVG = svgText;
+    svgPreview.innerHTML = svgText;
+    resultPanel.classList.remove('hidden');
+
+    if (checksumOk === true) {
+      checksumNotice.innerHTML = '<b>✓ Checksum verified</b> — the transcribed code matches the original transmission exactly.';
+      setStatus('ok', 'Reverted successfully — checksum verified.');
+    } else if (checksumOk === false) {
+      checksumNotice.innerHTML = '<b>⚠ Checksum mismatch</b> — the file was reconstructed, but the transcription may contain an error. Double-check the dictated code.';
+      setStatus('warn', 'Reverted — but checksum did not match. Verify the transcription.');
+    } else {
+      checksumNotice.innerHTML = 'No checksum block (<code>::</code>) was provided, so the transcription could not be verified automatically.';
+      setStatus('ok', 'Reverted successfully — no checksum to verify.');
+    }
+  } catch (err) {
+    setStatus('err', err.message);
+    resultPanel.classList.add('hidden');
+  } finally {
+    revertBtn.disabled = false;
+    revertBtn.textContent = 'Revert';
+  }
+});
+
+downloadSvgBtn.addEventListener('click', () => {
+  if (!lastSVG) return;
+  const blob = new Blob([lastSVG], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = lastFilename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
