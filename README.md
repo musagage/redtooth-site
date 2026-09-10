@@ -63,4 +63,4 @@ redtooth-website/
 
 ## License
 
-© 2026 Redtooth. All rights reserved.
+© 2026 Redtooth by EMAROL. All rights reserved.
